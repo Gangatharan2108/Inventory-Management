@@ -1,0 +1,279 @@
+/* ==============================
+   GLOBAL SETTINGS
+================================= */
+
+:root {
+    --primary-color: #1e293b;
+    --secondary-color: #334155;
+    --accent-color: #2563eb;
+    --success-color: #16a34a;
+    --danger-color: #dc2626;
+    --warning-color: #f59e0b;
+    --light-bg: #f4f6f9;
+    --border-color: #e5e7eb;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', Arial, sans-serif;
+    background-color: var(--light-bg);
+    color: #1f2937;
+}
+
+/* ==============================
+   SIDEBAR
+================================= */
+
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+    padding: 20px;
+    color: #fff;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar a {
+    color: #cbd5e1;
+    display: block;
+    padding: 12px 18px;
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.sidebar a:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+/* ==============================
+   CARD DESIGN
+================================= */
+
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+    transition: 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    background: linear-gradient(to right, #192a51, #1e293b);
+    color: white;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 16px 16px 0 0 !important;
+    padding: 18px 24px;
+}
+
+
+/* Stock Adjustment Specific Fix */
+
+.stock-card {
+    border-radius: 18px;
+}
+
+.stock-card-header {
+    background: #ffc107 !important;  /* Bootstrap warning color */
+    color: #212529 !important;
+    border-radius: 18px 18px 0 0 !important;
+}
+
+
+/* Damaged Stock Specific Fix */
+
+.damaged-card {
+    border-radius: 18px;
+}
+
+.damaged-card-header {
+    background: #dc3545 !important; /* Bootstrap danger */
+    color: #ffffff !important;
+    border-radius: 18px 18px 0 0 !important;
+}
+
+/* ==============================
+   TABLE DESIGN
+================================= */
+
+.table {
+    border-collapse: separate;
+    border-spacing: 0 6px;
+}
+
+.table thead th {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #64748b;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.table tbody tr {
+    background-color: #ffffff;
+    border-radius: 12px;
+    transition: 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+.table td {
+    font-size: 14px;
+    vertical-align: middle;
+    border-top: none;
+}
+
+
+/* Payment Table Header Fix */
+
+.payment-table-header th {
+    background-color: var(--primary-color);
+    color: #ffffff !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+}
+
+/* ==============================
+   FORM STYLING
+================================= */
+
+.form-control,
+.form-select {
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    padding: 10px 12px;
+    font-size: 14px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.15rem rgba(37, 99, 235, 0.2);
+}
+
+/* ==============================
+   BUTTON STYLING
+================================= */
+
+.btn {
+    border-radius: 10px;
+    font-size: 14px;
+    padding: 8px 14px;
+    transition: 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border: none;
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border: none;
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    border: none;
+    color: #fff;
+}
+
+/* ==============================
+   BADGES
+================================= */
+
+.badge {
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 20px;
+}
+
+/* ==============================
+   MODAL
+================================= */
+
+.modal-content {
+    border-radius: 16px;
+    border: none;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* ==============================
+   DASHBOARD CARDS
+================================= */
+
+.dashboard-card {
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.product-card {
+    border-radius: 16px;
+    transition: 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+/* ==============================
+   UTILITY CLASSES
+================================= */
+
+.text-danger,
+.text-success {
+    font-weight: 600;
+}
+
+
+/* Activity Page */
+
+.activity-card {
+    border-radius: 18px;
+}
+
+.activity-header {
+    background: linear-gradient(to right, #0f172a, #1e293b);
+    color: #ffffff;
+    padding: 18px 24px;
+    border-radius: 18px 18px 0 0;
+}
+
+.activity-table thead th {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+}
+
+.activity-table tbody tr:hover {
+    background-color: #f8fafc;
+    transition: 0.2s ease;
+}
