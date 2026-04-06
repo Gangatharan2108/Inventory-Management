@@ -55,7 +55,6 @@ const Sidebar = ({ isOpen, onClose }) => {
   /* Close drawer on route change (mobile/tablet) */
   useEffect(() => {
     if (onClose) onClose();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
   const handleLogout = () => {
