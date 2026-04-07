@@ -85,7 +85,6 @@ const DASH_STYLES = `
   .d-livedot { animation: pulseDot 1.8s ease-in-out infinite }
   .d-spinner { animation: dashSpin .75s linear infinite }
 
-  /* Hover — CSS vars use பண்றதால Tailwind-ல செய்ய முடியாது */
   .d-kpi:hover  { transform:translateY(-5px) !important; box-shadow:var(--shadow-lg) !important; border-color:var(--border-hover) !important; }
   .d-dcard:hover { transform:translateY(-4px) !important; box-shadow:0 16px 40px rgba(0,0,0,.12) !important; border-color:var(--border-hover) !important; }
   .d-addbtn:hover { background:var(--accent) !important; color:#fff !important; border-color:var(--accent) !important; transform:scale(1.1) !important; }
@@ -102,6 +101,11 @@ const DASH_STYLES = `
   .d-scroll::-webkit-scrollbar       { width: 4px }
   .d-scroll::-webkit-scrollbar-track { background: transparent }
   .d-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px }
+
+  /* Mobile responsive rows */
+  @media (max-width: 768px) {
+    .d-row1, .d-row2, .d-row3 { grid-template-columns: 1fr !important; }
+  }
 `;
 
 /* ── Recharts Tooltip ── */
@@ -238,8 +242,6 @@ export default function Dashboard() {
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ── Which dashboard sections can this user see? ──────────────
-  // Owner → all 7. Others → whatever is in dashboard.fields permission.
   const ALL_DASH_FIELDS = [
     "product_list",
     "sale_summary",
@@ -254,7 +256,7 @@ export default function Dashboard() {
     if (user.role === "Owner") return ALL_DASH_FIELDS;
     const fields = user?.permissions?.dashboard?.fields;
     if (Array.isArray(fields) && fields.length > 0) return fields;
-    return ALL_DASH_FIELDS; // fallback: show all if no fields set
+    return ALL_DASH_FIELDS;
   }, [user]);
 
   const canShow = (fieldKey) => allowedFields.includes(fieldKey);
@@ -367,12 +369,10 @@ export default function Dashboard() {
   );
   const stockChart = useMemo(
     () =>
-      stock
-        .slice(0, 15)
-        .map((i) => ({
-          nm: (i.product_name || "").substring(0, 12),
-          qty: i.available_quantity || 0,
-        })),
+      stock.slice(0, 15).map((i) => ({
+        nm: (i.product_name || "").substring(0, 12),
+        qty: i.available_quantity || 0,
+      })),
     [stock],
   );
   const partySumm = useMemo(
@@ -433,9 +433,6 @@ export default function Dashboard() {
       </>
     );
 
-  /* ─────────────────────────────────────────────────────
-     KPI card data array
-  ───────────────────────────────────────────────────── */
   const kpiCards = [
     {
       delay: ".05s",
@@ -496,14 +493,10 @@ export default function Dashboard() {
     },
   ];
 
-  /* ─────────────────────────────────────────────────────
-     RENDER
-  ───────────────────────────────────────────────────── */
   return (
     <>
       <style>{DASH_STYLES}</style>
 
-      {/* Page Wrapper */}
       <div
         style={{
           fontFamily: "var(--font-body)",
@@ -513,7 +506,7 @@ export default function Dashboard() {
       >
         <Topbar productSearchQuery={q} setProductSearchQuery={setQ} />
 
-        {/* ════ KPI CARDS — 4 columns ════ */}
+        {/* ════ KPI CARDS ════ */}
         <div className="grid grid-cols-4 gap-[18px] mb-7 max-[1100px]:grid-cols-2 max-[600px]:grid-cols-1">
           {kpiCards.map((k, i) => (
             <div
@@ -526,12 +519,10 @@ export default function Dashboard() {
                 boxShadow: "var(--shadow-sm)",
               }}
             >
-              {/* Top colour strip */}
               <div
                 className="absolute top-0 left-0 right-0 h-[3px] rounded-t-[20px]"
                 style={{ background: k.strip }}
               />
-              {/* Icon + Badge */}
               <div className="flex items-start justify-between mb-4">
                 <div
                   className="w-[46px] h-[46px] rounded-[13px] flex items-center justify-center text-xl shrink-0"
@@ -551,7 +542,6 @@ export default function Dashboard() {
                   {k.bTxt}
                 </div>
               </div>
-              {/* Value */}
               <div
                 className="d-slidein font-extrabold leading-none mb-1.5"
                 style={{
@@ -579,727 +569,750 @@ export default function Dashboard() {
         </div>
 
         {/* ════ ROW 1 — Products | Sales | Purchase ════ */}
-        {(canShow("product_list") || canShow("sale_summary") || canShow("purchase_summary")) && (
-        <div
-          className="gap-5 mb-5"
-          style={{
-            display: "grid",
-            gridTemplateColumns: [
-              canShow("product_list"),
-              canShow("sale_summary"),
-              canShow("purchase_summary"),
-            ].filter(Boolean).length === 1
-              ? "1fr"
-              : [
-                    canShow("product_list"),
-                    canShow("sale_summary"),
-                    canShow("purchase_summary"),
-                  ].filter(Boolean).length === 2
-                ? "1fr 1fr"
-                : "1fr 1fr 1fr",
-          }}
-        >
-          {/* ── Product List ── */}
-          {canShow("product_list") && <div
-            className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
+        {(canShow("product_list") ||
+          canShow("sale_summary") ||
+          canShow("purchase_summary")) && (
+          <div
+            className="d-row1 gap-5 mb-5"
             style={{
-              animationDelay: ".05s",
-              background: "var(--bg-card)",
-              borderColor: "var(--border)",
-              boxShadow: "var(--shadow-sm)",
+              display: "grid",
+              gridTemplateColumns:
+                [
+                  canShow("product_list"),
+                  canShow("sale_summary"),
+                  canShow("purchase_summary"),
+                ].filter(Boolean).length === 1
+                  ? "1fr"
+                  : [
+                        canShow("product_list"),
+                        canShow("sale_summary"),
+                        canShow("purchase_summary"),
+                      ].filter(Boolean).length === 2
+                    ? "1fr 1fr"
+                    : "1fr 1fr 1fr",
             }}
           >
-            <CardHdr
-              iconBg="var(--accent-bg)"
-              icon="bi-box-seam"
-              iconColor="var(--accent)"
-              title="Product List"
-              right={
-                <Link
-                  to="/products/create"
-                  className="d-addbtn w-[30px] h-[30px] rounded-[9px] flex items-center justify-center text-lg no-underline border shrink-0 transition-all duration-[180ms]"
-                  style={{
-                    background: "var(--accent-bg)",
-                    color: "var(--accent)",
-                    borderColor: "rgba(99,102,241,.2)",
-                  }}
-                >
-                  <i className="bi bi-plus" />
-                </Link>
-              }
-            />
-            <div className="d-scroll flex flex-col max-h-[500px] overflow-y-auto">
-              {prods.length === 0 ? (
-                <Empty icon="bi-box-seam" text="No products found" />
-              ) : (
-                prods.slice(0, 10).map((p) => {
-                  const low = p.stock_quantity <= p.minimum_stock;
-                  const pct = p.stock_percent || 0;
-                  const bC =
-                    pct > 60
-                      ? "var(--success)"
-                      : pct > 30
-                        ? "var(--warning)"
-                        : "var(--danger)";
-                  const pBg =
-                    pct > 60
-                      ? "var(--success-bg)"
-                      : pct > 30
-                        ? "var(--warning-bg)"
-                        : "var(--danger-bg)";
-                  const pC =
-                    pct > 60
-                      ? "var(--success)"
-                      : pct > 30
-                        ? "var(--warning)"
-                        : "var(--danger)";
-                  return (
-                    <div
-                      key={p.id}
-                      className="d-prod flex items-center gap-3 px-5 py-[11px] cursor-pointer relative border-b"
-                      style={{ borderColor: "var(--border)" }}
+            {/* ── Product List ── */}
+            {canShow("product_list") && (
+              <div
+                className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
+                style={{
+                  animationDelay: ".05s",
+                  background: "var(--bg-card)",
+                  borderColor: "var(--border)",
+                  boxShadow: "var(--shadow-sm)",
+                }}
+              >
+                <CardHdr
+                  iconBg="var(--accent-bg)"
+                  icon="bi-box-seam"
+                  iconColor="var(--accent)"
+                  title="Product List"
+                  right={
+                    <Link
+                      to="/products/create"
+                      className="d-addbtn w-[30px] h-[30px] rounded-[9px] flex items-center justify-center text-lg no-underline border shrink-0 transition-all duration-[180ms]"
+                      style={{
+                        background: "var(--accent-bg)",
+                        color: "var(--accent)",
+                        borderColor: "rgba(99,102,241,.2)",
+                      }}
                     >
-                      <img
-                        src={p.image || "https://via.placeholder.com/46"}
-                        alt={p.product_name}
-                        className="w-11 h-11 rounded-[11px] object-cover shrink-0 border"
-                        style={{
-                          border: "1px solid var(--border)",
-                          background: "var(--bg-card-alt)",
-                        }}
-                      />
-                      <div className="flex-1 min-w-0">
+                      <i className="bi bi-plus" />
+                    </Link>
+                  }
+                />
+                <div className="d-scroll flex flex-col max-h-[500px] overflow-y-auto">
+                  {prods.length === 0 ? (
+                    <Empty icon="bi-box-seam" text="No products found" />
+                  ) : (
+                    prods.slice(0, 10).map((p) => {
+                      const low = p.stock_quantity <= p.minimum_stock;
+                      const pct = p.stock_percent || 0;
+                      const bC =
+                        pct > 60
+                          ? "var(--success)"
+                          : pct > 30
+                            ? "var(--warning)"
+                            : "var(--danger)";
+                      const pBg =
+                        pct > 60
+                          ? "var(--success-bg)"
+                          : pct > 30
+                            ? "var(--warning-bg)"
+                            : "var(--danger-bg)";
+                      const pC =
+                        pct > 60
+                          ? "var(--success)"
+                          : pct > 30
+                            ? "var(--warning)"
+                            : "var(--danger)";
+                      return (
                         <div
-                          className="text-[13px] font-semibold truncate"
-                          style={{
-                            fontFamily: "var(--font-head)",
-                            color: "var(--text-primary)",
-                          }}
+                          key={p.id}
+                          className="d-prod flex items-center gap-3 px-5 py-[11px] cursor-pointer relative border-b"
+                          style={{ borderColor: "var(--border)" }}
                         >
-                          {p.product_name}
-                        </div>
-                        <div
-                          className="text-[11px] mt-0.5"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          {p.category_name || "—"}
-                        </div>
-                        <div
-                          className="h-[3px] rounded-[10px] overflow-hidden mt-1.5 w-14"
-                          style={{ background: "var(--bg-card-alt)" }}
-                        >
-                          <div
+                          <img
+                            src={p.image || "https://via.placeholder.com/46"}
+                            alt={p.product_name}
+                            className="w-11 h-11 rounded-[11px] object-cover shrink-0 border"
                             style={{
-                              height: "100%",
-                              width: `${pct}%`,
-                              background: bC,
-                              borderRadius: 10,
-                              transition: "width .4s",
+                              border: "1px solid var(--border)",
+                              background: "var(--bg-card-alt)",
+                            }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div
+                              className="text-[13px] font-semibold truncate"
+                              style={{
+                                fontFamily: "var(--font-head)",
+                                color: "var(--text-primary)",
+                              }}
+                            >
+                              {p.product_name}
+                            </div>
+                            <div
+                              className="text-[11px] mt-0.5"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              {p.category_name || "—"}
+                            </div>
+                            <div
+                              className="h-[3px] rounded-[10px] overflow-hidden mt-1.5 w-14"
+                              style={{ background: "var(--bg-card-alt)" }}
+                            >
+                              <div
+                                style={{
+                                  height: "100%",
+                                  width: `${pct}%`,
+                                  background: bC,
+                                  borderRadius: 10,
+                                  transition: "width .4s",
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div
+                              className="text-[13.5px] font-bold"
+                              style={{
+                                fontFamily: "var(--font-head)",
+                                color: "var(--text-primary)",
+                              }}
+                            >
+                              {fmt(p.selling_price)}
+                            </div>
+                            <div
+                              className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full mt-1"
+                              style={{
+                                background: low ? "var(--danger-bg)" : pBg,
+                                color: low ? "var(--danger)" : pC,
+                              }}
+                            >
+                              {low ? "Low" : `${pct}%`}
+                            </div>
+                          </div>
+                          <i
+                            className="bi bi-chevron-right d-arr text-[11px] absolute right-3"
+                            style={{
+                              color: "var(--text-muted)",
+                              opacity: 0,
+                              transform: "translateX(-4px)",
+                              transition: "all .15s",
                             }}
                           />
                         </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div
-                          className="text-[13.5px] font-bold"
-                          style={{
-                            fontFamily: "var(--font-head)",
-                            color: "var(--text-primary)",
-                          }}
-                        >
-                          {fmt(p.selling_price)}
-                        </div>
-                        <div
-                          className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full mt-1"
-                          style={{
-                            background: low ? "var(--danger-bg)" : pBg,
-                            color: low ? "var(--danger)" : pC,
-                          }}
-                        >
-                          {low ? "Low" : `${pct}%`}
-                        </div>
-                      </div>
-                      <i
-                        className="bi bi-chevron-right d-arr text-[11px] absolute right-3"
-                        style={{
-                          color: "var(--text-muted)",
-                          opacity: 0,
-                          transform: "translateX(-4px)",
-                          transition: "all .15s",
-                        }}
-                      />
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── Sales Summary ── */}
+            {canShow("sale_summary") && (
+              <div
+                className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
+                style={{
+                  animationDelay: ".10s",
+                  background: "var(--bg-card)",
+                  borderColor: "var(--border)",
+                  boxShadow: "var(--shadow-sm)",
+                }}
+              >
+                <CardHdr
+                  iconBg="rgba(99,102,241,.1)"
+                  icon="bi-graph-up-arrow"
+                  iconColor="var(--accent)"
+                  title="Sales Summary"
+                  right={<FilterTabs value={sF} onChange={setSF} />}
+                />
+                <StatRow
+                  stats={[
+                    { v: fmt(sum(cS)), l: "Period Total" },
+                    { v: active(cS), l: "Active Days" },
+                    {
+                      v: fmt(cS.length ? sum(cS) / Math.max(1, active(cS)) : 0),
+                      l: "Avg / Day",
+                    },
+                  ]}
+                />
+                <div className="p-[18px_14px_14px]">
+                  {cS.length === 0 ? (
+                    <Empty icon="bi-graph-up" text="No sales data" />
+                  ) : (
+                    <div style={{ overflowX: "auto" }}>
+                      <ResponsiveContainer
+                        width={
+                          sF === "Yearly"
+                            ? Math.max(520, cS.length * 80)
+                            : "100%"
+                        }
+                        height={230}
+                      >
+                        <LineChart data={cS}>
+                          <defs>
+                            <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+                              <stop
+                                offset="0%"
+                                stopColor="#6366f1"
+                                stopOpacity={0.15}
+                              />
+                              <stop
+                                offset="100%"
+                                stopColor="#6366f1"
+                                stopOpacity={0}
+                              />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid
+                            strokeDasharray="4 4"
+                            stroke="var(--border)"
+                            vertical={false}
+                          />
+                          <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 11, fill: "var(--text-muted)" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis
+                            domain={domY(cS)}
+                            tick={{ fontSize: 11, fill: "var(--text-muted)" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <Tooltip content={<Tip />} />
+                          <Line
+                            type="monotone"
+                            dataKey="amount"
+                            stroke="#6366f1"
+                            strokeWidth={2.5}
+                            dot={{
+                              fill: "#6366f1",
+                              r: 4,
+                              strokeWidth: 2,
+                              stroke: "#fff",
+                            }}
+                            activeDot={{ r: 6, strokeWidth: 0 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
                     </div>
-                  );
-                })
-              )}
-            </div>
-          </div>}
-
-          {/* ── Sales Summary ── */}
-          {canShow("sale_summary") && <div
-            className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
-            style={{
-              animationDelay: ".10s",
-              background: "var(--bg-card)",
-              borderColor: "var(--border)",
-              boxShadow: "var(--shadow-sm)",
-            }}
-          >
-            <CardHdr
-              iconBg="rgba(99,102,241,.1)"
-              icon="bi-graph-up-arrow"
-              iconColor="var(--accent)"
-              title="Sales Summary"
-              right={<FilterTabs value={sF} onChange={setSF} />}
-            />
-            <StatRow
-              stats={[
-                { v: fmt(sum(cS)), l: "Period Total" },
-                { v: active(cS), l: "Active Days" },
-                {
-                  v: fmt(cS.length ? sum(cS) / Math.max(1, active(cS)) : 0),
-                  l: "Avg / Day",
-                },
-              ]}
-            />
-            <div className="p-[18px_14px_14px]">
-              {cS.length === 0 ? (
-                <Empty icon="bi-graph-up" text="No sales data" />
-              ) : (
-                <div style={{ overflowX: "auto" }}>
-                  <ResponsiveContainer
-                    width={
-                      sF === "Yearly" ? Math.max(520, cS.length * 80) : "100%"
-                    }
-                    height={230}
-                  >
-                    <LineChart data={cS}>
-                      <defs>
-                        <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
-                          <stop
-                            offset="0%"
-                            stopColor="#6366f1"
-                            stopOpacity={0.15}
-                          />
-                          <stop
-                            offset="100%"
-                            stopColor="#6366f1"
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid
-                        strokeDasharray="4 4"
-                        stroke="var(--border)"
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="date"
-                        tick={{ fontSize: 11, fill: "var(--text-muted)" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        domain={domY(cS)}
-                        tick={{ fontSize: 11, fill: "var(--text-muted)" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <Tooltip content={<Tip />} />
-                      <Line
-                        type="monotone"
-                        dataKey="amount"
-                        stroke="#6366f1"
-                        strokeWidth={2.5}
-                        dot={{
-                          fill: "#6366f1",
-                          r: 4,
-                          strokeWidth: 2,
-                          stroke: "#fff",
-                        }}
-                        activeDot={{ r: 6, strokeWidth: 0 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>}
+              </div>
+            )}
 
-          {/* ── Purchase Summary ── */}
-          {canShow("purchase_summary") && <div
-            className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
-            style={{
-              animationDelay: ".15s",
-              background: "var(--bg-card)",
-              borderColor: "var(--border)",
-              boxShadow: "var(--shadow-sm)",
-            }}
-          >
-            <CardHdr
-              iconBg="rgba(245,158,11,.1)"
-              icon="bi-cart-check"
-              iconColor="var(--warning)"
-              title="Purchase Summary"
-              right={<FilterTabs value={pF} onChange={setPF} />}
-            />
-            <StatRow
-              stats={[
-                { v: fmt(sum(cP)), l: "Period Total" },
-                { v: active(cP), l: "Active Days" },
-                {
-                  v: fmt(cP.length ? sum(cP) / Math.max(1, active(cP)) : 0),
-                  l: "Avg / Day",
-                },
-              ]}
-            />
-            <div className="p-[18px_14px_14px]">
-              {cP.length === 0 ? (
-                <Empty icon="bi-cart-check" text="No purchase data" />
-              ) : (
-                <div style={{ overflowX: "auto" }}>
-                  <ResponsiveContainer
-                    width={
-                      pF === "Yearly" ? Math.max(520, cP.length * 80) : "100%"
-                    }
-                    height={230}
-                  >
-                    <LineChart data={cP}>
-                      <CartesianGrid
-                        strokeDasharray="4 4"
-                        stroke="var(--border)"
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="date"
-                        tick={{ fontSize: 11, fill: "var(--text-muted)" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        domain={domY(cP)}
-                        tick={{ fontSize: 11, fill: "var(--text-muted)" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <Tooltip content={<Tip />} />
-                      <Line
-                        type="monotone"
-                        dataKey="amount"
-                        stroke="#f59e0b"
-                        strokeWidth={2.5}
-                        dot={{
-                          fill: "#f59e0b",
-                          r: 4,
-                          strokeWidth: 2,
-                          stroke: "#fff",
-                        }}
-                        activeDot={{ r: 6, strokeWidth: 0 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+            {/* ── Purchase Summary ── */}
+            {canShow("purchase_summary") && (
+              <div
+                className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
+                style={{
+                  animationDelay: ".15s",
+                  background: "var(--bg-card)",
+                  borderColor: "var(--border)",
+                  boxShadow: "var(--shadow-sm)",
+                }}
+              >
+                <CardHdr
+                  iconBg="rgba(245,158,11,.1)"
+                  icon="bi-cart-check"
+                  iconColor="var(--warning)"
+                  title="Purchase Summary"
+                  right={<FilterTabs value={pF} onChange={setPF} />}
+                />
+                <StatRow
+                  stats={[
+                    { v: fmt(sum(cP)), l: "Period Total" },
+                    { v: active(cP), l: "Active Days" },
+                    {
+                      v: fmt(cP.length ? sum(cP) / Math.max(1, active(cP)) : 0),
+                      l: "Avg / Day",
+                    },
+                  ]}
+                />
+                <div className="p-[18px_14px_14px]">
+                  {cP.length === 0 ? (
+                    <Empty icon="bi-cart-check" text="No purchase data" />
+                  ) : (
+                    <div style={{ overflowX: "auto" }}>
+                      <ResponsiveContainer
+                        width={
+                          pF === "Yearly"
+                            ? Math.max(520, cP.length * 80)
+                            : "100%"
+                        }
+                        height={230}
+                      >
+                        <LineChart data={cP}>
+                          <CartesianGrid
+                            strokeDasharray="4 4"
+                            stroke="var(--border)"
+                            vertical={false}
+                          />
+                          <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 11, fill: "var(--text-muted)" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis
+                            domain={domY(cP)}
+                            tick={{ fontSize: 11, fill: "var(--text-muted)" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <Tooltip content={<Tip />} />
+                          <Line
+                            type="monotone"
+                            dataKey="amount"
+                            stroke="#f59e0b"
+                            strokeWidth={2.5}
+                            dot={{
+                              fill: "#f59e0b",
+                              r: 4,
+                              strokeWidth: 2,
+                              stroke: "#fff",
+                            }}
+                            activeDot={{ r: 6, strokeWidth: 0 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>}
-        </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* ════ ROW 2 — Profit & Loss | Customer Outstanding ════ */}
         {(canShow("profit_loss") || canShow("customer_outstanding")) && (
-        <div
-          className="gap-5 mb-5"
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              canShow("profit_loss") && canShow("customer_outstanding")
-                ? "4fr 8fr"
-                : "1fr",
-          }}
-        >
-          {/* ── Profit & Loss ── */}
-          {canShow("profit_loss") && <div
-            className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
+          <div
+            className="d-row2 gap-5 mb-5"
             style={{
-              animationDelay: ".05s",
-              background: "var(--bg-card)",
-              borderColor: "var(--border)",
-              boxShadow: "var(--shadow-sm)",
+              display: "grid",
+              gridTemplateColumns:
+                canShow("profit_loss") && canShow("customer_outstanding")
+                  ? "4fr 8fr"
+                  : "1fr",
             }}
           >
-            <CardHdr
-              iconBg="rgba(139,92,246,.1)"
-              icon="bi-pie-chart"
-              iconColor="var(--purple)"
-              title="Profit & Loss"
-            />
-            <div className="p-[22px]">
-              {pl ? (
-                <>
-                  <ResponsiveContainer width="100%" height={180}>
-                    <PieChart>
-                      <Pie
-                        data={plChart}
-                        dataKey="value"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={80}
-                        innerRadius={46}
-                        paddingAngle={3}
-                      >
-                        <Cell fill="#10b981" />
-                        <Cell fill="#ef4444" />
-                      </Pie>
-                      <Tooltip formatter={(v) => fmt(v)} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="grid grid-cols-2 gap-[10px] mt-[14px]">
-                    {[
-                      {
-                        l: "Total Sales",
-                        v: pl.total_sales,
-                        c: "var(--accent)",
-                      },
-                      {
-                        l: "Total Purchase",
-                        v: pl.total_purchase,
-                        c: "var(--warning)",
-                      },
-                    ].map((item) => (
+            {/* ── Profit & Loss ── */}
+            {canShow("profit_loss") && (
+              <div
+                className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
+                style={{
+                  animationDelay: ".05s",
+                  background: "var(--bg-card)",
+                  borderColor: "var(--border)",
+                  boxShadow: "var(--shadow-sm)",
+                }}
+              >
+                <CardHdr
+                  iconBg="rgba(139,92,246,.1)"
+                  icon="bi-pie-chart"
+                  iconColor="var(--purple)"
+                  title="Profit & Loss"
+                />
+                <div className="p-[22px]">
+                  {pl ? (
+                    <>
+                      <ResponsiveContainer width="100%" height={180}>
+                        <PieChart>
+                          <Pie
+                            data={plChart}
+                            dataKey="value"
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={80}
+                            innerRadius={46}
+                            paddingAngle={3}
+                          >
+                            <Cell fill="#10b981" />
+                            <Cell fill="#ef4444" />
+                          </Pie>
+                          <Tooltip formatter={(v) => fmt(v)} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="grid grid-cols-2 gap-[10px] mt-[14px]">
+                        {[
+                          {
+                            l: "Total Sales",
+                            v: pl.total_sales,
+                            c: "var(--accent)",
+                          },
+                          {
+                            l: "Total Purchase",
+                            v: pl.total_purchase,
+                            c: "var(--warning)",
+                          },
+                        ].map((item) => (
+                          <div
+                            key={item.l}
+                            className="rounded-[10px] px-[14px] py-3 text-center border"
+                            style={{
+                              background: "var(--bg-card-alt)",
+                              borderColor: "var(--border)",
+                            }}
+                          >
+                            <div
+                              className="text-[11px] font-medium mb-1"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              {item.l}
+                            </div>
+                            <div
+                              className="text-[14px] font-bold"
+                              style={{
+                                fontFamily: "var(--font-head)",
+                                color: item.c,
+                              }}
+                            >
+                              {fmt(item.v)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                       <div
-                        key={item.l}
-                        className="rounded-[10px] px-[14px] py-3 text-center border"
+                        className="mt-2.5 rounded-[10px] p-[14px] text-center border border-indigo-500/20"
                         style={{
-                          background: "var(--bg-card-alt)",
-                          borderColor: "var(--border)",
+                          background:
+                            "linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.06))",
                         }}
                       >
                         <div
-                          className="text-[11px] font-medium mb-1"
+                          className="text-[10.5px] font-semibold uppercase tracking-[.05em] mb-1.5"
                           style={{ color: "var(--text-muted)" }}
                         >
-                          {item.l}
+                          Net Profit / Loss
                         </div>
                         <div
-                          className="text-[14px] font-bold"
+                          className="text-[26px] font-extrabold"
                           style={{
                             fontFamily: "var(--font-head)",
-                            color: item.c,
+                            color:
+                              pl.profit >= 0
+                                ? "var(--success)"
+                                : "var(--danger)",
                           }}
                         >
-                          {fmt(item.v)}
+                          {fmt(pl.profit)}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                  <div
-                    className="mt-2.5 rounded-[10px] p-[14px] text-center border border-indigo-500/20"
-                    style={{
-                      background:
-                        "linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.06))",
-                    }}
-                  >
-                    <div
-                      className="text-[10.5px] font-semibold uppercase tracking-[.05em] mb-1.5"
+                    </>
+                  ) : (
+                    <Empty icon="bi-pie-chart" text="No data available" />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── Customer Outstanding ── */}
+            {canShow("customer_outstanding") && (
+              <div
+                className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
+                style={{
+                  animationDelay: ".10s",
+                  background: "var(--bg-card)",
+                  borderColor: "var(--border)",
+                  boxShadow: "var(--shadow-sm)",
+                }}
+              >
+                <CardHdr
+                  iconBg="rgba(6,182,212,.1)"
+                  icon="bi-people"
+                  iconColor="var(--info)"
+                  title="Customer Outstanding"
+                  right={
+                    <span
+                      className="flex items-center gap-1.5 text-[12px]"
                       style={{ color: "var(--text-muted)" }}
                     >
-                      Net Profit / Loss
-                    </div>
-                    <div
-                      className="text-[26px] font-extrabold"
-                      style={{
-                        fontFamily: "var(--font-head)",
-                        color:
-                          pl.profit >= 0 ? "var(--success)" : "var(--danger)",
-                      }}
-                    >
-                      {fmt(pl.profit)}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <Empty icon="bi-pie-chart" text="No data available" />
-              )}
-            </div>
-          </div>}
-
-          {/* ── Customer Outstanding ── */}
-          {canShow("customer_outstanding") && <div
-            className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
-            style={{
-              animationDelay: ".10s",
-              background: "var(--bg-card)",
-              borderColor: "var(--border)",
-              boxShadow: "var(--shadow-sm)",
-            }}
-          >
-            <CardHdr
-              iconBg="rgba(6,182,212,.1)"
-              icon="bi-people"
-              iconColor="var(--info)"
-              title="Customer Outstanding"
-              right={
-                <span
-                  className="flex items-center gap-1.5 text-[12px]"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  <span
-                    className="d-livedot inline-block w-[7px] h-[7px] rounded-full"
-                    style={{ background: "var(--success)" }}
-                  />
-                  Live
-                </span>
-              }
-            />
-            <div className="px-[10px] py-[16px]">
-              {custOut.length === 0 ? (
-                <Empty icon="bi-people" text="No customer data" />
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={custOut.map((i) => ({
-                        name: i.customer_name || "Walk-in",
-                        value: Number(i.total_bill),
-                      }))}
-                      dataKey="value"
-                      nameKey="name"
-                      outerRadius={120}
-                      innerRadius={55}
-                      paddingAngle={2}
-                      label={({ name, percent }) =>
-                        `${name} (${(percent * 100).toFixed(0)}%)`
-                      }
-                      labelLine={{
-                        stroke: "var(--text-muted)",
-                        strokeWidth: 1,
-                      }}
-                    >
-                      {custOut.map((_, i) => (
-                        <Cell
-                          key={i}
-                          fill={PIE_COLORS[i % PIE_COLORS.length]}
+                      <span
+                        className="d-livedot inline-block w-[7px] h-[7px] rounded-full"
+                        style={{ background: "var(--success)" }}
+                      />
+                      Live
+                    </span>
+                  }
+                />
+                <div className="px-[10px] py-[16px]">
+                  {custOut.length === 0 ? (
+                    <Empty icon="bi-people" text="No customer data" />
+                  ) : (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={custOut.map((i) => ({
+                            name: i.customer_name || "Walk-in",
+                            value: Number(i.total_bill),
+                          }))}
+                          dataKey="value"
+                          nameKey="name"
+                          outerRadius={120}
+                          innerRadius={55}
+                          paddingAngle={2}
+                          label={({ name, percent }) =>
+                            `${name} (${(percent * 100).toFixed(0)}%)`
+                          }
+                          labelLine={{
+                            stroke: "var(--text-muted)",
+                            strokeWidth: 1,
+                          }}
+                        >
+                          {custOut.map((_, i) => (
+                            <Cell
+                              key={i}
+                              fill={PIE_COLORS[i % PIE_COLORS.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(v) =>
+                            `₹ ${Number(v).toLocaleString("en-IN")}`
+                          }
                         />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(v) =>
-                        `₹ ${Number(v).toLocaleString("en-IN")}`
-                      }
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-          </div>}
-        </div>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* ════ ROW 3 — Current Stock | Parties ════ */}
         {(canShow("current_stock") || canShow("parties")) && (
-        <div
-          className="gap-5 mb-5"
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              canShow("current_stock") && canShow("parties")
-                ? "8fr 4fr"
-                : "1fr",
-          }}
-        >
-          {/* ── Current Stock ── */}
-          {canShow("current_stock") && <div
-            className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
+          <div
+            className="d-row3 gap-5 mb-5"
             style={{
-              animationDelay: ".05s",
-              background: "var(--bg-card)",
-              borderColor: "var(--border)",
-              boxShadow: "var(--shadow-sm)",
+              display: "grid",
+              gridTemplateColumns:
+                canShow("current_stock") && canShow("parties")
+                  ? "8fr 4fr"
+                  : "1fr",
             }}
           >
-            <CardHdr
-              iconBg="rgba(139,92,246,.1)"
-              icon="bi-bar-chart-line"
-              iconColor="var(--purple)"
-              title="Current Stock"
-              right={
-                <span
-                  className="text-[12px] font-medium"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  Top {stockChart.length} products
-                </span>
-              }
-            />
-            <div className="overflow-x-auto p-[18px_14px_14px]">
-              {stockChart.length === 0 ? (
-                <Empty icon="bi-bar-chart-line" text="No stock data" />
-              ) : (
-                <ResponsiveContainer
-                  width={Math.max(680, stockChart.length * 110)}
-                  height={290}
-                >
-                  <BarChart data={stockChart} barCategoryGap={28}>
-                    <defs>
-                      <linearGradient id="stg" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#8b5cf6" />
-                        <stop offset="100%" stopColor="#6366f1" />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      strokeDasharray="4 4"
-                      vertical={false}
-                      stroke="var(--border)"
-                    />
-                    <XAxis
-                      dataKey="nm"
-                      angle={-30}
-                      textAnchor="end"
-                      height={80}
-                      tick={{ fontSize: 11.5, fill: "var(--text-muted)" }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 11, fill: "var(--text-muted)" }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <Tooltip
-                      cursor={{ fill: "rgba(99,102,241,.04)", radius: 8 }}
-                      contentStyle={{
-                        borderRadius: 12,
-                        border: "1px solid var(--border)",
-                        boxShadow: "var(--shadow-md)",
-                        fontSize: 13,
-                        background: "var(--bg-card)",
-                      }}
-                    />
-                    <Bar
-                      dataKey="qty"
-                      fill="url(#stg)"
-                      radius={[10, 10, 0, 0]}
-                      barSize={36}
+            {/* ── Current Stock ── */}
+            {canShow("current_stock") && (
+              <div
+                className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
+                style={{
+                  animationDelay: ".05s",
+                  background: "var(--bg-card)",
+                  borderColor: "var(--border)",
+                  boxShadow: "var(--shadow-sm)",
+                }}
+              >
+                <CardHdr
+                  iconBg="rgba(139,92,246,.1)"
+                  icon="bi-bar-chart-line"
+                  iconColor="var(--purple)"
+                  title="Current Stock"
+                  right={
+                    <span
+                      className="text-[12px] font-medium"
+                      style={{ color: "var(--text-muted)" }}
                     >
-                      <LabelList
-                        dataKey="qty"
-                        position="top"
-                        style={{
-                          fontSize: 11.5,
-                          fontWeight: 700,
-                          fill: "var(--text-secondary)",
-                        }}
-                      />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-          </div>}
-
-          {/* ── Parties Summary ── */}
-          {canShow("parties") && <div
-            className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
-            style={{
-              animationDelay: ".10s",
-              background: "var(--bg-card)",
-              borderColor: "var(--border)",
-              boxShadow: "var(--shadow-sm)",
-            }}
-          >
-            <CardHdr
-              iconBg="rgba(16,185,129,.1)"
-              icon="bi-people"
-              iconColor="var(--success)"
-              title="Parties Summary"
-            />
-            <div className="p-[22px] flex flex-col gap-3">
-              {[
-                {
-                  cls: "d-psup",
-                  bg: "linear-gradient(135deg,rgba(245,158,11,.07),rgba(251,191,36,.04))",
-                  iB: "var(--warning-bg)",
-                  em: "🏭",
-                  lbl: "Total Suppliers",
-                  val: partySumm.sup,
-                  to: "/parties?type=Supplier",
-                  bC: "var(--warning)",
-                  bBg: "var(--warning-bg)",
-                  bBr: "rgba(245,158,11,.25)",
-                },
-                {
-                  cls: "d-pcust",
-                  bg: "linear-gradient(135deg,rgba(16,185,129,.07),rgba(52,211,153,.04))",
-                  iB: "var(--success-bg)",
-                  em: "👤",
-                  lbl: "Total Customers",
-                  val: partySumm.cust,
-                  to: "/parties?type=Customer",
-                  bC: "var(--success)",
-                  bBg: "var(--success-bg)",
-                  bBr: "rgba(16,185,129,.25)",
-                },
-                {
-                  cls: "d-ptot",
-                  bg: "linear-gradient(135deg,rgba(99,102,241,.07),rgba(129,140,248,.04))",
-                  iB: "var(--accent-bg)",
-                  em: "🤝",
-                  lbl: "All Parties",
-                  val: parties.length,
-                  to: "/parties",
-                  bC: "var(--accent)",
-                  bBg: "var(--accent-bg)",
-                  bBr: "rgba(99,102,241,.25)",
-                },
-              ].map((row) => (
-                <div
-                  key={row.lbl}
-                  className="rounded-[16px] flex items-center gap-3.5 border relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
-                  style={{
-                    padding: "18px 18px 14px",
-                    background: row.bg,
-                    borderColor: "var(--border)",
-                  }}
-                >
-                  <div
-                    className="w-12 h-12 rounded-[13px] flex items-center justify-center text-[22px] shrink-0"
-                    style={{ background: row.iB }}
-                  >
-                    {row.em}
-                  </div>
-                  <div className="flex-1">
-                    <div
-                      className="text-[12px] font-medium mb-1"
-                      style={{ color: "var(--text-secondary)" }}
+                      Top {stockChart.length} products
+                    </span>
+                  }
+                />
+                <div className="overflow-x-auto p-[18px_14px_14px]">
+                  {stockChart.length === 0 ? (
+                    <Empty icon="bi-bar-chart-line" text="No stock data" />
+                  ) : (
+                    <ResponsiveContainer
+                      width={Math.max(680, stockChart.length * 110)}
+                      height={290}
                     >
-                      {row.lbl}
-                    </div>
-                    <div
-                      className="text-[30px] font-extrabold leading-none"
-                      style={{
-                        fontFamily: "var(--font-head)",
-                        color: "var(--text-primary)",
-                      }}
-                    >
-                      {row.val}
-                    </div>
-                  </div>
-                  <Link
-                    to={row.to}
-                    className={`${row.cls} text-[11.5px] font-semibold px-[13px] py-1.5 rounded-[8px] no-underline border whitespace-nowrap transition-all duration-[180ms]`}
-                    style={{
-                      color: row.bC,
-                      background: row.bBg,
-                      borderColor: row.bBr,
-                    }}
-                  >
-                    View →
-                  </Link>
+                      <BarChart data={stockChart} barCategoryGap={28}>
+                        <defs>
+                          <linearGradient id="stg" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#8b5cf6" />
+                            <stop offset="100%" stopColor="#6366f1" />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid
+                          strokeDasharray="4 4"
+                          vertical={false}
+                          stroke="var(--border)"
+                        />
+                        <XAxis
+                          dataKey="nm"
+                          angle={-30}
+                          textAnchor="end"
+                          height={80}
+                          tick={{ fontSize: 11.5, fill: "var(--text-muted)" }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 11, fill: "var(--text-muted)" }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          cursor={{ fill: "rgba(99,102,241,.04)", radius: 8 }}
+                          contentStyle={{
+                            borderRadius: 12,
+                            border: "1px solid var(--border)",
+                            boxShadow: "var(--shadow-md)",
+                            fontSize: 13,
+                            background: "var(--bg-card)",
+                          }}
+                        />
+                        <Bar
+                          dataKey="qty"
+                          fill="url(#stg)"
+                          radius={[10, 10, 0, 0]}
+                          barSize={36}
+                        >
+                          <LabelList
+                            dataKey="qty"
+                            position="top"
+                            style={{
+                              fontSize: 11.5,
+                              fontWeight: 700,
+                              fill: "var(--text-secondary)",
+                            }}
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>}
-        </div>
+              </div>
+            )}
+
+            {/* ── Parties Summary ── */}
+            {canShow("parties") && (
+              <div
+                className="d-fadein d-dcard rounded-[20px] overflow-hidden border transition-all duration-[220ms]"
+                style={{
+                  animationDelay: ".10s",
+                  background: "var(--bg-card)",
+                  borderColor: "var(--border)",
+                  boxShadow: "var(--shadow-sm)",
+                }}
+              >
+                <CardHdr
+                  iconBg="rgba(16,185,129,.1)"
+                  icon="bi-people"
+                  iconColor="var(--success)"
+                  title="Parties Summary"
+                />
+                <div className="p-[22px] flex flex-col gap-3">
+                  {[
+                    {
+                      cls: "d-psup",
+                      bg: "linear-gradient(135deg,rgba(245,158,11,.07),rgba(251,191,36,.04))",
+                      iB: "var(--warning-bg)",
+                      em: "🏭",
+                      lbl: "Total Suppliers",
+                      val: partySumm.sup,
+                      to: "/parties?type=Supplier",
+                      bC: "var(--warning)",
+                      bBg: "var(--warning-bg)",
+                      bBr: "rgba(245,158,11,.25)",
+                    },
+                    {
+                      cls: "d-pcust",
+                      bg: "linear-gradient(135deg,rgba(16,185,129,.07),rgba(52,211,153,.04))",
+                      iB: "var(--success-bg)",
+                      em: "👤",
+                      lbl: "Total Customers",
+                      val: partySumm.cust,
+                      to: "/parties?type=Customer",
+                      bC: "var(--success)",
+                      bBg: "var(--success-bg)",
+                      bBr: "rgba(16,185,129,.25)",
+                    },
+                    {
+                      cls: "d-ptot",
+                      bg: "linear-gradient(135deg,rgba(99,102,241,.07),rgba(129,140,248,.04))",
+                      iB: "var(--accent-bg)",
+                      em: "🤝",
+                      lbl: "All Parties",
+                      val: parties.length,
+                      to: "/parties",
+                      bC: "var(--accent)",
+                      bBg: "var(--accent-bg)",
+                      bBr: "rgba(99,102,241,.25)",
+                    },
+                  ].map((row) => (
+                    <div
+                      key={row.lbl}
+                      className="rounded-[16px] flex items-center gap-3.5 border relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
+                      style={{
+                        padding: "18px 18px 14px",
+                        background: row.bg,
+                        borderColor: "var(--border)",
+                      }}
+                    >
+                      <div
+                        className="w-12 h-12 rounded-[13px] flex items-center justify-center text-[22px] shrink-0"
+                        style={{ background: row.iB }}
+                      >
+                        {row.em}
+                      </div>
+                      <div className="flex-1">
+                        <div
+                          className="text-[12px] font-medium mb-1"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          {row.lbl}
+                        </div>
+                        <div
+                          className="text-[30px] font-extrabold leading-none"
+                          style={{
+                            fontFamily: "var(--font-head)",
+                            color: "var(--text-primary)",
+                          }}
+                        >
+                          {row.val}
+                        </div>
+                      </div>
+                      <Link
+                        to={row.to}
+                        className={`${row.cls} text-[11.5px] font-semibold px-[13px] py-1.5 rounded-[8px] no-underline border whitespace-nowrap transition-all duration-[180ms]`}
+                        style={{
+                          color: row.bC,
+                          background: row.bBg,
+                          borderColor: row.bBr,
+                        }}
+                      >
+                        View →
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </>
