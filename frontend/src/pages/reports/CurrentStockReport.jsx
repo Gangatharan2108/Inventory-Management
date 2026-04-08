@@ -454,6 +454,7 @@ function CurrentStockReport() {
                   color: "#f1f5f9",
                   fontSize: 12,
                 }}
+                itemStyle={{ color: "#22c55e" }}
                 formatter={(v) => [
                   `₹ ${Number(v).toLocaleString("en-IN")}`,
                   "Stock Value",
