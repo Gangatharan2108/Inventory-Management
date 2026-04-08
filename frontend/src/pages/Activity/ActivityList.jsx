@@ -207,8 +207,8 @@ const ActivityList = () => {
   ).length;
   const countLogin = filteredActivities.filter(
     (a) =>
-      a.action?.toLowerCase().includes("login") ||
-      a.action?.toLowerCase().includes("logout"),
+      a.action?.toLowerCase().includes("sale") ||
+      a.action?.toLowerCase().includes("purchase"),
   ).length;
 
   /* ── Loading ── */
@@ -319,7 +319,7 @@ const ActivityList = () => {
             icon="bi-trash3-fill"
           />
           <KpiCard
-            label="Auth Events"
+            label="Sales and Purchases"
             value={countLogin}
             gradient="bg-gradient-to-br from-violet-500 to-violet-700"
             icon="bi-shield-lock-fill"
